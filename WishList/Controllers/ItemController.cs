@@ -1,22 +1,43 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using WishList.Data;
 
 namespace WishList.Controllers
 {
     public class ItemController : Controller
     {
-        public IActionResult Create()
-        {
-            throw new System.NotImplementedException();
-        }
+        private readonly ApplicationDbContext _context;
 
-        public IActionResult Delete()
+        public ItemController(ApplicationDbContext context)
         {
-            throw new System.NotImplementedException();
+            _context = context;
         }
-
         public IActionResult Index()
         {
-            throw new System.NotImplementedException();
+            var model = _context.Items.ToList();
+            return View("Index", model);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View("Create");
+        }
+
+        [HttpPost]
+        public IActionResult Create(Models.Item item)
+        {
+            _context.Add(item);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var item = _context.Items.FirstOrDefault(e => e.Id == id);
+            _context.Remove(item);
+            _context.SaveChanges();
+            return RedirectToAction("Index");
         }
     }
 }
